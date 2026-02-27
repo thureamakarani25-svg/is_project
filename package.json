@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "npm --prefix frontend start"
+    "start": "npm --prefix frontend start",
+    "build": "npm --prefix frontend run build"
   },
   "dependencies": {
     "axios": "^1.13.5"
