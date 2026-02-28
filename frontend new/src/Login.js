@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000/api").replace(/\/$/, "");
+
 function Login() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -15,17 +17,14 @@ function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         axios
-            .post("http://127.0.0.1:8000/api/login/", formData)
+            .post(`${API_BASE_URL}/login/`, formData)
             .then((res) => {
                 alert("Login Successful, Token: " + res.data.token);
                 localStorage.setItem("token", res.data.token);
+                localStorage.setItem("username", res.data.username || "");
+                localStorage.setItem("is_staff", String(Boolean(res.data.is_staff)));
 
-                const role = res.data.role || res.data.user?.role;
-                if (role) {
-                    localStorage.setItem("role", role);
-                }
-
-                if (role === "admin") {
+                if (res.data.is_staff) {
                     navigate("/admin");
                 } else {
                     navigate("/user");
