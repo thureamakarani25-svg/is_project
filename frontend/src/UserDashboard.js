@@ -86,15 +86,19 @@ function UserDashboard({ user }) {
         schedule: selectedSchedule.id,
         seat_number: selectedSeat,
       });
-      alert(`✓ Booking Confirmed!\nSeat ${selectedSeat} has been booked successfully!`);
+      alert(`Booking confirmed.\nSeat ${selectedSeat} has been booked successfully.`);
       setBookingModal(false);
       setSelectedSchedule(null);
       setSelectedSeat(null);
       fetchBookings();
-      handleSelectSchedule(selectedSchedule);
+      fetchSchedules();
       setActiveTab('bookings');
     } catch (err) {
-      setError(err.response?.data?.non_field_errors?.[0] || err.response?.data?.detail || 'Failed to book seat');
+      setError(
+        err.response?.data?.non_field_errors?.[0] ||
+          err.response?.data?.detail ||
+          'Failed to book seat'
+      );
     }
   };
 
@@ -141,16 +145,18 @@ function UserDashboard({ user }) {
       {activeTab === 'search' && (
         <div className="tab-content">
           <h2>Available Routes & Schedules</h2>
-          
+
           <div className="route-filter">
-            <label htmlFor="route-select"><strong>Filter by Route:</strong></label>
-            <select 
+            <label htmlFor="route-select">
+              <strong>Filter by Route:</strong>
+            </label>
+            <select
               id="route-select"
               value={selectedRoute ? selectedRoute.id : ''}
               onChange={(e) => {
                 const routeId = e.target.value;
                 if (routeId) {
-                  const route = routes.find(r => r.id === parseInt(routeId));
+                  const route = routes.find((r) => r.id === parseInt(routeId, 10));
                   setSelectedRoute(route);
                 } else {
                   setSelectedRoute(null);
@@ -158,48 +164,49 @@ function UserDashboard({ user }) {
               }}
             >
               <option value="">-- Show all routes --</option>
-              {routes.map(route => (
+              {routes.map((route) => (
                 <option key={route.id} value={route.id}>
-                  {route.from_location} → {route.to_location}
+                  {route.from_location} -> {route.to_location}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="schedules-grid">
-            {schedules.filter(schedule => !selectedRoute || schedule.route === selectedRoute.id).length === 0 ? (
+            {schedules.filter((schedule) => !selectedRoute || schedule.route === selectedRoute.id)
+              .length === 0 ? (
               <p>{schedules.length === 0 ? 'No schedules available' : 'No schedules for selected route'}</p>
             ) : (
-              schedules.filter(schedule => !selectedRoute || schedule.route === selectedRoute.id).map((schedule) => (
-                <div key={schedule.id} className="schedule-card">
-                  <div className="schedule-info">
-                    <h3>
-                      {schedule.route_details?.from_location} → {schedule.route_details?.to_location}
-                    </h3>
-                    <p>
-                      <strong>Bus Number:</strong> {schedule.bus_number}
-                    </p>
-                    <p>
-                      <strong>Bus Name:</strong> {schedule.bus_name}
-                    </p>
-                    <p>
-                      <strong>Departure:</strong> {new Date(schedule.departure_time).toLocaleString()}
-                    </p>
-                    <p>
-                      <strong>Price:</strong> TZS {schedule.price}
-                    </p>
-                    <p>
-                      <strong>Available Seats:</strong> {schedule.available_seats}
-                    </p>
+              schedules
+                .filter((schedule) => !selectedRoute || schedule.route === selectedRoute.id)
+                .map((schedule) => (
+                  <div key={schedule.id} className="schedule-card">
+                    <div className="schedule-info">
+                      <h3>
+                        {schedule.route_details?.from_location} -> {schedule.route_details?.to_location}
+                      </h3>
+                      <p>
+                        <strong>Bus Number:</strong> {schedule.bus_number}
+                      </p>
+                      <p>
+                        <strong>Bus Name:</strong> {schedule.bus_name}
+                      </p>
+                      <p>
+                        <strong>Departure:</strong>{' '}
+                        {new Date(schedule.departure_time).toLocaleString()}
+                      </p>
+                      <p>
+                        <strong>Price:</strong> TZS {schedule.price}
+                      </p>
+                      <p>
+                        <strong>Available Seats:</strong> {schedule.available_seats}
+                      </p>
+                    </div>
+                    <button className="btn-primary" onClick={() => handleSelectSchedule(schedule)}>
+                      Select & Book
+                    </button>
                   </div>
-                  <button
-                    className="btn-primary"
-                    onClick={() => handleSelectSchedule(schedule)}
-                  >
-                    Select & Book
-                  </button>
-                </div>
-              ))
+                ))
             )}
           </div>
         </div>
@@ -209,7 +216,12 @@ function UserDashboard({ user }) {
         <div className="tab-content">
           <h2>My Bookings</h2>
           {bookings.length === 0 ? (
-            <p>You have no bookings yet. <button type="button" className="link-button" onClick={() => setActiveTab('search')}>Search and book a ticket</button></p>
+            <p>
+              You have no bookings yet.{' '}
+              <button type="button" className="link-button" onClick={() => setActiveTab('search')}>
+                Search and book a ticket
+              </button>
+            </p>
           ) : (
             <div className="bookings-list">
               {bookings.map((booking) => (
@@ -226,22 +238,20 @@ function UserDashboard({ user }) {
                       <strong>Booked At:</strong> {new Date(booking.booked_at).toLocaleString()}
                     </p>
                     <p>
-                      <strong>Status:</strong> 
+                      <strong>Status:</strong>{' '}
                       <span className={`status-badge ${booking.status}`}>
-                        {booking.status === 'confirmed' ? '✓ Confirmed' : '✗ Cancelled'}
+                        {booking.status === 'confirmed' ? 'Confirmed' : 'Cancelled'}
                       </span>
                     </p>
                     {booking.cancelled_at && (
                       <p>
-                        <strong>Cancelled At:</strong> {new Date(booking.cancelled_at).toLocaleString()}
+                        <strong>Cancelled At:</strong>{' '}
+                        {new Date(booking.cancelled_at).toLocaleString()}
                       </p>
                     )}
                   </div>
                   {booking.status === 'confirmed' && (
-                    <button
-                      className="btn-danger"
-                      onClick={() => handleCancelBooking(booking.id)}
-                    >
+                    <button className="btn-danger" onClick={() => handleCancelBooking(booking.id)}>
                       Cancel Booking
                     </button>
                   )}
@@ -259,7 +269,10 @@ function UserDashboard({ user }) {
             <div className="booking-details">
               <div className="detail-row">
                 <strong>Route:</strong>
-                <span>{selectedSchedule.route_details?.from_location} → {selectedSchedule.route_details?.to_location}</span>
+                <span>
+                  {selectedSchedule.route_details?.from_location} ->{' '}
+                  {selectedSchedule.route_details?.to_location}
+                </span>
               </div>
               <div className="detail-row">
                 <strong>Bus Number:</strong>
@@ -284,7 +297,9 @@ function UserDashboard({ user }) {
             </div>
 
             <h3>Select Your Seat</h3>
-            <p className="seats-info">Available Seats: {availableSeats.length} | Total Seats: {selectedSchedule.bus_total_seats}</p>
+            <p className="seats-info">
+              Available Seats: {availableSeats.length} | Total Seats: {selectedSchedule.bus_total_seats}
+            </p>
             <div className="seats-grid">
               {Array.from({ length: selectedSchedule.bus_total_seats }, (_, i) => i + 1).map(
                 (seatNum) => (
@@ -306,11 +321,7 @@ function UserDashboard({ user }) {
               <button className="btn-secondary" onClick={() => setBookingModal(false)}>
                 Cancel
               </button>
-              <button 
-                className="btn-primary" 
-                onClick={handleConfirmBooking}
-                disabled={!selectedSeat}
-              >
+              <button className="btn-primary" onClick={handleConfirmBooking} disabled={!selectedSeat}>
                 Confirm Booking
               </button>
             </div>

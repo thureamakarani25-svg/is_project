@@ -15,7 +15,11 @@ function Register({ onNavigate }) {
     const data = err.response?.data;
 
     if (!data) {
-      return 'Cannot reach backend API. Start Django server on http://localhost:8000';
+      const isLocalhost =
+        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      return isLocalhost
+        ? 'Cannot reach backend API. Start Django server on http://localhost:8000'
+        : 'Cannot reach backend API. Check REACT_APP_API_BASE_URL in your Vercel project settings.';
     }
     if (typeof data === 'string') {
       return data;

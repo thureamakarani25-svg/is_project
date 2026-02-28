@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import Login from './Login';
 import Register from './Register';
@@ -9,6 +9,24 @@ import api from './api';
 function App() {
   const [currentPage, setCurrentPage] = useState('login');
   const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    const userId = localStorage.getItem('user_id');
+    const isStaffRaw = localStorage.getItem('is_staff');
+
+    if (token && username && userId && isStaffRaw !== null) {
+      const isStaff = String(isStaffRaw) === 'true';
+      setUser({
+        token,
+        username,
+        user_id: Number(userId),
+        is_staff: isStaff,
+      });
+      setCurrentPage(isStaff ? 'admin' : 'user');
+    }
+  }, []);
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
