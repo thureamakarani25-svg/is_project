@@ -66,7 +66,7 @@ CORS_ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
-CORS_ALLOWED_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'ticketsystemproject.urls'
 
@@ -91,28 +91,38 @@ WSGI_APPLICATION = 'ticketsystemproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-database_url = "postgresql://neondb_owner:npg_sVOkNFTXi6r9@ep-silent-feather-aipr07h3-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-parsed = urlparse(database_url)
-query_params = parse_qs(parsed.query)
-db_options = {
-    "sslmode": query_params.get("sslmode", ["require"])[0],
-}
-if "channel_binding" in query_params:
-    db_options["channel_binding"] = query_params["channel_binding"][0]
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": parsed.path.lstrip("/"),
-        "USER": parsed.username or "",
-        "PASSWORD": parsed.password or "",
-        "HOST": parsed.hostname or "",
-        "PORT": str(parsed.port or "5432"),
-        "ATOMIC_REQUESTS": True,
-        "CONN_MAX_AGE": 600,
-        "CONN_HEALTH_CHECKS": True,
-        "OPTIONS": db_options,
+database_url = os.environ.get("DATABASE_URL", "").strip()
+
+if database_url:
+    parsed = urlparse(database_url)
+    query_params = parse_qs(parsed.query)
+    db_options = {
+        "sslmode": query_params.get("sslmode", ["require"])[0],
     }
-}
+    if "channel_binding" in query_params:
+        db_options["channel_binding"] = query_params["channel_binding"][0]
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": parsed.path.lstrip("/"),
+            "USER": parsed.username or "",
+            "PASSWORD": parsed.password or "",
+            "HOST": parsed.hostname or "",
+            "PORT": str(parsed.port or "5432"),
+            "ATOMIC_REQUESTS": True,
+            "CONN_MAX_AGE": 600,
+            "CONN_HEALTH_CHECKS": True,
+            "OPTIONS": db_options,
+        }
+    }
+else:
+    # Local fallback when DATABASE_URL is not set.
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
     
 
