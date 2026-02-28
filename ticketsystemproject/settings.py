@@ -4,7 +4,7 @@ Django settings for ticketsystemproject project.
 
 import os
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,30 +91,29 @@ WSGI_APPLICATION = 'ticketsystemproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-database_url = os.environ.get("DATABASE_URL")
-if database_url:
-    parsed = urlparse(database_url)
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": parsed.path.lstrip("/"),
-            "USER": parsed.username or "",
-            "PASSWORD": parsed.password or "",
-            "HOST": parsed.hostname or "",
-            "PORT": str(parsed.port or "5432"),
-            "ATOMIC_REQUESTS": True,
-            "CONN_MAX_AGE": 600,
-            "CONN_HEALTH_CHECKS": True,
-        }
+database_url = os.environ.get(
+    "DATABASE_URL",
+    "postgresql://neondb_owner:npg_sVOkNFTXi6r9@ep-silent-feather-aipr07h3-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+)
+parsed = urlparse(database_url)
+query_params = parse_qs(parsed.query)
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": parsed.path.lstrip("/"),
+        "USER": parsed.username or "",
+        "PASSWORD": parsed.password or "",
+        "HOST": parsed.hostname or "",
+        "PORT": str(parsed.port or "5432"),
+        "ATOMIC_REQUESTS": True,
+        "CONN_MAX_AGE": 600,
+        "CONN_HEALTH_CHECKS": True,
+        "OPTIONS": {
+            "sslmode": query_params.get("sslmode", ["require"])[0],
+            "channel_binding": query_params.get("channel_binding", ["require"])[0],
+        },
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-            "ATOMIC_REQUESTS": True,
-        }
-    }
+}
 
     
 
