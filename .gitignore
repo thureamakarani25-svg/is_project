@@ -1,0 +1,8 @@
+node_modules/
+frontend/node_modules/
+frontend new/node_modules/
+build/
+frontend/build/
+frontend new/build/
+__pycache__/
+*.pyc
