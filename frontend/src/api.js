@@ -2,10 +2,11 @@ import axios from 'axios';
 
 const normalizeBaseUrl = (url) => (url || '').replace(/\/+$/, '');
 const envApiBaseUrl = normalizeBaseUrl(process.env.REACT_APP_API_BASE_URL);
+const renderApiBaseUrl = 'https://ticketsystem-backend-mzog.onrender.com/api';
 const isLocalhost =
   typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-const API_BASE_URL = envApiBaseUrl || (isLocalhost ? 'http://localhost:8000/api' : '/api');
+const API_BASE_URL = envApiBaseUrl || (isLocalhost ? 'http://localhost:8000/api' : renderApiBaseUrl);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
