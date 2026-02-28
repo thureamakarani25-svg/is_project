@@ -91,12 +91,14 @@ WSGI_APPLICATION = 'ticketsystemproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-database_url = os.environ.get(
-    "DATABASE_URL",
-    "postgresql://neondb_owner:npg_sVOkNFTXi6r9@ep-silent-feather-aipr07h3-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-)
+database_url = "postgresql://neondb_owner:npg_sVOkNFTXi6r9@ep-silent-feather-aipr07h3-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 parsed = urlparse(database_url)
 query_params = parse_qs(parsed.query)
+db_options = {
+    "sslmode": query_params.get("sslmode", ["require"])[0],
+}
+if "channel_binding" in query_params:
+    db_options["channel_binding"] = query_params["channel_binding"][0]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -108,10 +110,7 @@ DATABASES = {
         "ATOMIC_REQUESTS": True,
         "CONN_MAX_AGE": 600,
         "CONN_HEALTH_CHECKS": True,
-        "OPTIONS": {
-            "sslmode": query_params.get("sslmode", ["require"])[0],
-            "channel_binding": query_params.get("channel_binding", ["require"])[0],
-        },
+        "OPTIONS": db_options,
     }
 }
 
